@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+app.set("trust proxy", true);
 
 app.use(cors());
 app.use(express.json());
@@ -13,33 +14,33 @@ app.get("/", (req, res) => {
 
 // Attendance API
 app.post("/mark-attendance", (req, res) => {
-  let ip =
+  const clientIP =
     req.headers["x-forwarded-for"]?.split(",")[0] ||
     req.socket.remoteAddress;
 
-  // Handle IPv6-mapped IPv4 (IMPORTANT)
-  if (ip.startsWith("::ffff:")) {
-    ip = ip.replace("::ffff:", "");
-  }
+  console.log("Client IP:", clientIP);
 
-  console.log("Client IP:", ip);
+  const isCollegeWifi =
+    clientIP.startsWith("192.168.") ||
+    clientIP.startsWith("10.") ||
+    clientIP.startsWith("172.");
 
-  // ✅ College Wi-Fi range
-  const COLLEGE_IP_PREFIX = "192.168.";
-
-  if (!ip.startsWith(COLLEGE_IP_PREFIX)) {
+  if (!isCollegeWifi) {
     return res.status(403).json({
       success: false,
       message: "Attendance allowed only on college Wi-Fi",
     });
   }
 
-  // ✅ Attendance allowed
   return res.json({
     success: true,
     message: "Attendance marked successfully",
   });
 });
+
+
+
+ 
 
 const PORT = process.env.PORT || 5000;
 

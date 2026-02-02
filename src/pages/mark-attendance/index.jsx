@@ -54,35 +54,42 @@ const MarkAttendance = () => {
 
   // 🔥 REAL BACKEND-VERIFIED ATTENDANCE
   const handleMarkAttendance = async () => {
-    if (isMarked) return;
+  if (isMarked || isLoading) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      const response = await fetch(
-        "http://192.168.107.190:5000/mark-attendance", // 🔴 CHANGE to YOUR backend IP
-        { method: "POST" }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        const now = new Date();
-        setMarkedTime(formatTime(now));
-        setIsMarked(true);
-        setShowSuccessModal(true);
-
-        setTimeout(() => setShowSuccessModal(false), 3000);
-      } else {
-        alert("❌ " + data.message);
+  try {
+    const res = await fetch(
+      "https://ideal-empathy-production.up.railway.app/mark-attendance",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "omit",
       }
-    } catch (error) {
-      // Happens when NOT on college Wi-Fi
-      alert("❌ Please connect to hostel Wi-Fi to mark attendance");
-    } finally {
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Attendance not allowed");
       setIsLoading(false);
+      return;
     }
-  };
+
+    const now = new Date();
+    setMarkedTime(formatTime(now));
+    setIsMarked(true);
+    setShowSuccessModal(true);
+  } catch (err) {
+    alert("Server unreachable");
+  } finally {
+    setIsLoading(false);
+    setTimeout(() => setShowSuccessModal(false), 3000);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background">
