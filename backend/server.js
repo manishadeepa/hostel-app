@@ -13,19 +13,19 @@ app.get("/", (req, res) => {
 });
 
 // Attendance API
-app.post("/mark-attendance", (req, res) => {
+
+
+ app.post("/mark-attendance", (req, res) => {
   const clientIP =
-    req.headers["x-forwarded-for"]?.split(",")[0] ||
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
     req.socket.remoteAddress;
 
   console.log("Client IP:", clientIP);
 
-  const isCollegeWifi =
-    clientIP.startsWith("192.168.") ||
-    clientIP.startsWith("10.") ||
-    clientIP.startsWith("172.");
+  // ✅ COLLEGE WI-FI PUBLIC IP
+  const COLLEGE_PUBLIC_IP = "111.93.231.194";
 
-  if (!isCollegeWifi) {
+  if (clientIP !== COLLEGE_PUBLIC_IP) {
     return res.status(403).json({
       success: false,
       message: "Attendance allowed only on college Wi-Fi",
