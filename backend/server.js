@@ -8,8 +8,15 @@ app.use(cors());
 app.use(express.json());
 
 // Test route
-app.get("/", (req, res) => {
-  res.send("Backend is running");
+app.get("/debug-ip", (req, res) => {
+  const ip =
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.socket.remoteAddress;
+
+  res.json({
+    ip,
+    headers: req.headers,
+  });
 });
 
 // Attendance API
